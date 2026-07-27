@@ -1,44 +1,77 @@
-"""Extract PyRadiomics features from preprocessed image and tumor-mask files."""
+"""Extract PyRadiomics features from image and tumor-mask files."""
+
 from __future__ import annotations
+
 import argparse
 from pathlib import Path
+
 import pandas as pd
 import yaml
 from radiomics import featureextractor
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--config", required=True)
-    ap.add_argument("--image-dir", required=True)
-    ap.add_argument("--mask-dir", required=True)
-    ap.add_argument("--output", default=None)
-    ap.add_argument("--image-suffix", default="_image.nii.gz")
-    ap.add_argument("--mask-suffix", default="_mask.nii.gz")
-    args = ap.parse_args()
-    cfg = yaml.safe_load(Path(args.config).read_text())
-    output = Path(args.output or cfg["data"]["radiomics_table"])
-    output.parent.mkdir(parents=True, exist_ok=True)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", required=True)
+    parser.add_argument("--image-dir", required=True)
+    parser.add_argument("--mask-dir", required=True)
+    parser.add_argument("--output", default=None)
+    parser.add_argument("--image-suffix", default="_image.nii.gz")
+    parser.add_argument("--mask-suffix", default="_mask.nii.gz")
+    args = parser.parse_args()
 
-    # Use the same preprocessing and PyRadiomics parameter file used for the study.
-    params = cfg.get("radiomics", {}).get("params_file")
-    extractor = featureextractor.RadiomicsFeatureExtractor(params) if params else featureextractor.RadiomicsFeatureExtractor()
+    config = yaml.safe_load(
+        Path(args.config).read_text(encoding="utf-8")
+    )
+    output_path = Path(
+        args.output or config["data"]["radiomics_table"]
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    params_file = config.get("radiomics", {}).get("params_file")
+    if params_file:
+        extractor = featureextractor.RadiomicsFeatureExtractor(
+            params_file
+        )
+    else:
+        extractor = featureextractor.RadiomicsFeatureExtractor()
+
+    image_dir = Path(args.image_dir)
+    mask_dir = Path(args.mask_dir)
     rows = []
-    for image in sorted(Path(args.image_dir).glob(f"*{args.image_suffix}")):
-        patient_id = image.name[: -len(args.image_suffix)]
-        mask = Path(args.mask_dir) / f"{patient_id}{args.mask_suffix}"
-        if not mask.exists():
-            raise FileNotFoundError(f"Missing mask for {patient_id}: {mask}")
-        result = extractor.execute(str(image), str(mask))
+
+    for image_path in sorted(
+        image_dir.glob(f"*{args.image_suffix}")
+    ):
+        patient_id = image_path.name[: -len(args.image_suffix)]
+        mask_path = mask_dir / f"{patient_id}{args.mask_suffix}"
+        if not mask_path.is_file():
+            raise FileNotFoundError(
+                f"Missing mask for {patient_id}: {mask_path}"
+            )
+
+        result = extractor.execute(
+            str(image_path),
+            str(mask_path),
+        )
         row = {"patient_id": patient_id}
-        row.update({k: v for k, v in result.items() if not k.startswith("diagnostics_")})
+        row.update(
+            {
+                key: value
+                for key, value in result.items()
+                if not key.startswith("diagnostics_")
+            }
+        )
         rows.append(row)
+
     if not rows:
-        raise RuntimeError("No image files matched the requested suffix.")
-    pd.DataFrame(rows).to_csv(output, index=False)
-    print(f"Wrote {len(rows)} patients to {output}")
+        raise RuntimeError(
+            f"No image files matched suffix: {args.image_suffix}"
+        )
+
+    pd.DataFrame(rows).to_csv(output_path, index=False)
+    print(f"Wrote {len(rows)} patients to {output_path}")
 
 
 if __name__ == "__main__":
     main()
-
