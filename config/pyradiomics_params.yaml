@@ -1,0 +1,27 @@
+imageType:
+  Original: {}
+  LoG:
+    sigma: [1.0, 2.0, 3.0]
+  Wavelet: {}
+setting:
+  label: 1
+  correctMask: true
+  geometryTolerance: 1.0e-6
+  resampledPixelSpacing: [1.0, 1.0, 1.0]
+  interpolator: sitkBSpline
+  padDistance: 5
+  normalize: true
+  normalizeScale: 100
+  removeOutliers: 3
+  binWidth: 25
+  force2D: false
+  preCrop: true
+featureClass:
+  shape: []
+  firstorder: []
+  glcm: []
+  glrlm: []
+  glszm: []
+  gldm: []
+  ngtdm: []
+
