@@ -19,11 +19,11 @@ The integrated feature set is selected jointly from the combined radiomic and Vi
 python -m pip install -r requirements.txt
 cp config.example.yaml config.yaml
 # Edit config.yaml and provide local, deidentified data paths.
-python 02_feature_extraction/radiomics_extract.py --config config.yaml \
+python feature_extraction/radiomics_extract.py --config config.yaml \
   --image-dir /path/to/preprocessed_images --mask-dir /path/to/tumor_masks
-python 02_feature_extraction/vit_extract.py --config config.yaml \
+python feature_extraction/vit_extract.py --config config.yaml \
   --image-dir /path/to/preprocessed_images --mask-dir /path/to/tumor_masks
-python 03_model_development/run_models.py --config config.yaml
+python model_development/run_models.py --config config.yaml
 ```
 
 The scripts write only feature tables, fitted-pipeline metadata, predictions, and evaluation summaries. They do not write patient identifiers to figures or upload data. Feature-attribution analyses were performed separately and are not included in this code package.
