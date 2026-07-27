@@ -1,0 +1,39 @@
+seed: 42
+data:
+  clinical_table: data/clinical_labels.csv
+  radiomics_table: outputs/radiomics_features.csv
+  vit_table: outputs/vit_features.csv
+  output_dir: outputs/modeling
+radiomics:
+  params_file: config/pyradiomics_params.yaml
+columns:
+  patient_id: patient_id
+  label: pik3ca_status
+  cohort: cohort
+split:
+  test_size: 0.30
+  stratify: true
+selection:
+  p_threshold: 0.05
+  correlation_cutoff: 0.75
+  lasso_cv: 5
+  lasso_max_iter: 20000
+expected_final_feature_counts:
+  radiomics: 8
+  vit: 10
+  integrated: 15
+model:
+  # XGBoost settings selected by fivefold stratified cross-validation within
+  # the training set. No class-weight adjustment or oversampling was used.
+  xgb_candidates:
+    - objective: binary:logistic
+      eval_metric: auc
+      n_estimators: 12
+      max_depth: 7
+      learning_rate: 0.2
+      gamma: 1.0
+      colsample_bytree: 0.85
+      min_child_weight: 10
+      subsample: 0.8
+      reg_lambda: 1.5
+      reg_alpha: 0.1
