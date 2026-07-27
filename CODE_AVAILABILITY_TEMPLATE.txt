@@ -1,4 +1,0 @@
-Analysis code will be made available in a public repository at the time of publication. The repository will contain the feature-extraction, leakage-controlled feature-selection, model-development, model-evaluation, and SHAP-analysis scripts used in this study. Institutional images, tumor masks, clinical labels, and metabolomic/lipidomic data will not be shared because of privacy and data-use restrictions. The public TCGA-derived data should be cited and accessed through the original repository and its applicable data-use policies.
-
-Before submission, replace the first sentence with the permanent repository URL and DOI, if available. Do not include patient-level data or local institutional paths in the repository.
-
