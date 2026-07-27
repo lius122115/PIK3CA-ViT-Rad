@@ -4,8 +4,7 @@ import argparse
 from pathlib import Path
 import numpy as np
 import pandas as pd
-import yaml
-from sklearn.metrics import roc_auc_score, roc_curve
+from sklearn.metrics import roc_auc_score
 
 
 def bootstrap_auc(y, p, seed=42, n_resamples=1000):
@@ -20,11 +19,6 @@ def bootstrap_auc(y, p, seed=42, n_resamples=1000):
     if not values:
         return np.nan, np.nan, np.nan
     return float(roc_auc_score(y, p)), float(np.percentile(values, 2.5)), float(np.percentile(values, 97.5))
-
-
-def youden_threshold(y, p):
-    fpr, tpr, thresholds = roc_curve(y, p)
-    return float(thresholds[np.argmax(tpr - fpr)])
 
 
 def main():
@@ -50,4 +44,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
